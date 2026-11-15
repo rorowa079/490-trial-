@@ -1,0 +1,97 @@
+# Default settings. Override any value in a file named by the VRS_CONFIG
+# environment variable, or in config/local.yaml (git-ignored).
+
+data_dir: ./data            # everything the device writes lives under here
+camera_id: cam-01
+organization: Unnamed agency   # written into every audit entry and report (AU-3)
+
+retention:
+  clip_days: 30             # sealed event clips; purged by destroying the day key
+  index_days: 90            # plate hash + attribute index
+  snapshot_hours: 72        # review snapshots for alerts nobody has reviewed
+  purge_interval_minutes: 60
+
+privacy:
+  # Fold look-alike characters (O->0, I->1, Q->0) before hashing so an OCR
+  # confusion still matches. Slightly raises false matches, which the human
+  # review gate absorbs. Changing this invalidates every stored hash.
+  fold_ambiguous: true
+  min_plate_length: 2
+  max_plate_length: 8
+  # Blur people in every image that is kept (sealed clips, review snapshots,
+  # live view). Plate reading runs on the untouched frame, in RAM only.
+  redaction:
+    faces: true
+    people: true              # pedestrians reported by the vehicle detector
+    face_model: src/vrs/vision/models/face_detection_yunet_2023mar.onnx
+    face_score: 0.6           # lower = blur more aggressively
+
+matching:
+  min_ocr_confidence: 0.60  # reads below this are never hashed or stored
+  min_justification_chars: 20
+
+evidence:
+  seal_all_events: true     # false = only seal clips for hotlist matches
+  clip_fps: 5               # frames per second kept in a sealed clip
+  clip_max_seconds: 12
+  jpeg_quality: 80
+  shamir_threshold: 2       # custodians needed to unseal (two-person rule)
+  shamir_shares: 3          # custodians in total; 3-of-5 suits a city deployment
+  unsealed_view_minutes: 10 # how long an unsealed clip stays in RAM for viewing
+
+keys:
+  backend: software         # software = DEVELOPMENT ONLY. Use "tpm" on the device.
+  software_dir: ./data/keys-dev
+  tpm_hmac_handle: "0x81010001"     # persistent TPM handles made by scripts/setup_tpm.sh
+  tpm_review_handle: "0x81010002"
+  tpm_pcrs: "sha256:0,2,4,7"
+
+crypto:
+  # true = refuse to start unless OpenSSL runs its FIPS provider (a FIPS 140-3
+  # validated module, on an operating system that ships one).
+  require_fips_provider: false
+
+updates:
+  public_key_file: config/update_signing.pub     # made by scripts/sign_update.py keygen
+  manifest: src/vrs/vision/models/manifest.json  # signed list of model files
+  require_signed_models: false   # true on the device: refuse any model not in the signed manifest
+
+hotlist_sync:
+  url: ""                     # https://... ; empty = load lists by hand with scripts/hash_hotlist.py
+  ca_file: ""                 # CA that signed the server's certificate (pinned; system store not used)
+  interval_minutes: 60
+  require_signature: true     # the list must carry a valid <url>.sig
+
+supply_chain:
+  bom_file: config/hardware_bom.yaml
+
+security:
+  require_attestation: false   # true on the device: refuse to start on a bad boot state
+  expected_pcr_digest: ""
+  lens_dark_threshold: 12      # mean brightness (0-255) below this counts as covered
+  lens_blur_threshold: 4.0     # Laplacian variance below this counts as obstructed
+  lens_bad_frames: 45          # consecutive bad frames before tamper is raised
+  intrusion_gpio_pin: null     # BCM pin of the case switch, or null if not fitted
+
+api:
+  host: 127.0.0.1
+  port: 8000
+  session_minutes: 30
+  require_mfa: true
+  max_login_failures: 5
+  lockout_minutes: 15
+  min_password_chars: 12
+  pbkdf2_iterations: 600000
+  # Roles that must sign in with a FIDO2 security key. Until a user in one of
+  # these roles enrolls a key, their session can do nothing except enroll one.
+  phishing_resistant_roles: []
+  webauthn:
+    rp_id: localhost          # the host name people type to reach the dashboard (not an IP address)
+    rp_name: Vehicle Recognition System
+    origins: ["http://localhost:8000", "https://localhost:8000"]
+  tls:
+    enabled: false            # true = HTTPS only, TLS 1.3 minimum
+    cert_file: ""             # empty = use the device certificate in <data_dir>/identity
+    key_file: ""
+    client_ca_file: ""        # set to also require a client certificate from every browser
+    hostnames: [localhost]    # names put in the device certificate

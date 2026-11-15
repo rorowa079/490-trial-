@@ -1,0 +1,57 @@
+# Hardware bill of materials, checked against NDAA Section 889 by
+#     python scripts/check_bom.py
+#
+# List every part that captures, processes, stores or transmits data, with the
+# company that makes it AND the company that makes its main chip. The rule
+# follows the chip, not the sticker: a camera from any brand is barred if its
+# processor is from a covered company.
+#
+# The rows below come from the team's ASI budget worksheet. Parts the
+# worksheet names exactly are filled in. Parts it only describes ("1080p IP
+# camera", "1TB external SSD") stay "unknown" and are reported as unverified
+# until you choose a model and confirm its chipset from the datasheet.
+# Power, mounting and sensor parts (PoE HAT, enclosure, tamper switch,
+# accelerometer) are not listed: they are not telecommunications or video
+# surveillance equipment.
+
+components:
+  - name: Raspberry Pi 5, 8GB (compute, built-in Ethernet and Wi-Fi)
+    vendor: Raspberry Pi Ltd
+    chipset: BCM2712 processor; Wi-Fi/Bluetooth CYW43455
+    chipset_vendor: Broadcom; Infineon
+    source: https://www.raspberrypi.com/products/raspberry-pi-5/
+
+  - name: Coral USB Accelerator
+    vendor: Google (Coral)
+    chipset: Edge TPU
+    chipset_vendor: Google
+    source: https://coral.ai/products/accelerator
+
+  # THE ONE TO GET RIGHT. Low-cost 1080p IP cameras sold under many brand
+  # names are frequently built by Hikvision or Dahua, or use a HiSilicon
+  # (Huawei) processor, and those are barred whatever the label says. Pick a
+  # camera whose maker states NDAA Section 889 compliance in writing and names
+  # the processor, then fill this row in.
+  - name: 1080p IP camera with varifocal lens (REPLACE with the exact model)
+    vendor: unknown
+    chipset: unknown          # the camera's processor (SoC), not just the image sensor
+    chipset_vendor: unknown
+    source: ""
+
+  - name: 256GB high-endurance microSD card
+    vendor: SanDisk
+    chipset: SanDisk controller
+    chipset_vendor: SanDisk
+    source: ""                # add the product page; change this row if you buy another brand
+
+  - name: 1TB external SSD (REPLACE with the exact model)
+    vendor: unknown
+    chipset: unknown          # the SSD controller
+    chipset_vendor: unknown
+    source: ""
+
+  - name: TPM 2.0 module for Raspberry Pi (REPLACE with the exact board)
+    vendor: unknown           # the company that makes the board
+    chipset: OPTIGA TPM SLB 967x
+    chipset_vendor: Infineon
+    source: ""

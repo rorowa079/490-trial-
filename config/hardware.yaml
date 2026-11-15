@@ -1,0 +1,27 @@
+# Camera, model and calibration settings. Merged on top of default.yaml.
+
+capture:
+  source: simulated         # simulated | camera | file
+  device: 0                 # camera index or RTSP URL when source is "camera"
+  file: ""                  # video path when source is "file"
+  width: 1280
+  height: 720
+  fps: 15
+  buffer_seconds: 15        # ring buffer of encoded frames kept in RAM
+  motion_min_area: 1500     # pixels of change needed to wake the vision stage
+  motion_cooldown_frames: 30
+
+vision:
+  detector: simulated       # simulated | yolo
+  # A .pt file runs on the CPU. For the Coral USB Accelerator, export the model for the
+  # Edge TPU with ultralytics and point this at the resulting .tflite file (untried here).
+  yolo_weights: src/vrs/vision/models/yolov8n.pt
+  yolo_confidence: 0.35
+  ocr: simulated            # simulated | paddle
+  plate_weights: ""         # optional YOLO plate-localizer weights
+  track_lost_frames: 20     # frames without a detection before a track is closed
+  # Ground-plane calibration: metres represented by one pixel at the plate line.
+  # Measure a known distance on the road in the camera image to set this.
+  meters_per_pixel: 0.03
+  # Compass bearing (degrees) that "up" in the image corresponds to.
+  image_up_bearing: 0

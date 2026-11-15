@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+data/
+data-demo/
+config/local.yaml
+node_modules/
+dashboard/dist/
+*.pt
+*.onnx
+!src/vrs/vision/models/face_detection_yunet_2023mar.onnx
+*.tflite
+*.key
+update_signing.key

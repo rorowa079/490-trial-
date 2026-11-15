@@ -1,0 +1,12 @@
+# Used by scripts/run_demo.py only. Never use these settings on a real device.
+data_dir: ./data-demo
+keys:
+  backend: software
+  software_dir: ./data-demo/keys-dev
+api:
+  require_mfa: false
+capture:
+  source: simulated
+vision:
+  detector: simulated
+  ocr: simulated

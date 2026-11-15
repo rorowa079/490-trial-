@@ -1,0 +1,31 @@
+# Strict profile: every technical control this codebase offers, switched on.
+#
+#     VRS_CONFIG=config/compliance.yaml python -m vrs.app
+#
+# Site-specific values (organization, expected_pcr_digest, host names,
+# hotlist feed) still go in config/local.yaml, which is merged first.
+# Check the result with:  python scripts/compliance_check.py config/compliance.yaml
+#
+# The device will REFUSE TO START under this profile unless it has a TPM with
+# keys from scripts/setup_tpm.sh, an OS running a FIPS-validated OpenSSL
+# provider, and a signed model manifest. That is the point.
+
+crypto:
+  require_fips_provider: true
+keys:
+  backend: tpm
+security:
+  require_attestation: true
+updates:
+  require_signed_models: true
+hotlist_sync:
+  require_signature: true
+privacy:
+  redaction:
+    faces: true
+    people: true
+api:
+  require_mfa: true
+  phishing_resistant_roles: [reviewer, investigator, supervisor, auditor, admin]
+  tls:
+    enabled: true

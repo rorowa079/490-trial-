@@ -1,0 +1,25 @@
+[Unit]
+Description=Self-hosted vehicle recognition system
+After=network.target
+
+[Service]
+User=vrs
+WorkingDirectory=/opt/vrs
+Environment=PYTHONPATH=/opt/vrs/src
+Environment=VRS_CONFIG=/etc/vrs/device.yaml
+ExecStart=/usr/bin/python3 -m vrs.app
+# SIGTERM triggers the orderly shutdown that wipes keys from memory.
+KillSignal=SIGTERM
+TimeoutStopSec=15
+Restart=on-failure
+# After a tamper lock the service starts but refuses to process; do not loop.
+RestartSec=10
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/vrs/data
+PrivateTmp=true
+# No core dumps: a dump would write keys and frames to disk.
+LimitCORE=0
+
+[Install]
+WantedBy=multi-user.target
